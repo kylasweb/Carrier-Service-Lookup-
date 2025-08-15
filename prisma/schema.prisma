@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Carrier {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  logoUrl     String?
+  carrierType String?   // MLO, NVOCC, etc.
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  services    Service[]
+}
+
+model Service {
+  id              String         @id @default(cuid())
+  name            String
+  partnerServices String?
+  carrierId       String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  carrier         Carrier        @relation(fields: [carrierId], references: [id], onDelete: Cascade)
+  routes          ServiceRoute[]
+}
+
+model Port {
+  id          String   @id @default(cuid())
+  name        String
+  country     String
+  unloc       String   @unique
+  code        String?  // Optional port code
+  latitude    Float?   // Optional coordinates
+  longitude   Float?   // Optional coordinates
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  routesAsPol ServiceRoute[] @relation("ServiceRoutePol")
+  routesAsPod ServiceRoute[] @relation("ServiceRoutePod")
+}
+
+model ServiceRoute {
+  id          String   @id @default(cuid())
+  polId       String
+  podId       String
+  pol         String?  // Keep for backward compatibility during migration
+  pod         String?  // Keep for backward compatibility during migration
+  transitTime String
+  serviceId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  polPort     Port     @relation("ServiceRoutePol", fields: [polId], references: [id])
+  podPort     Port     @relation("ServiceRoutePod", fields: [podId], references: [id])
+}
