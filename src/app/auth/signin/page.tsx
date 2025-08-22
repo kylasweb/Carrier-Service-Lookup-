@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Ship, Lock, User, Zap } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-export default function SignIn() {
+function SignInForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -195,5 +195,26 @@ export default function SignIn() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SignIn() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-pastel-blue/10 via-pastel-purple/10 to-pastel-pink/10 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md glass-card">
+          <CardHeader className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-16 h-16 glass-card p-2 rounded-full flex items-center justify-center">
+                <Ship className="h-8 w-8 text-pastel-purple animate-pulse" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl bg-gradient-to-r from-pastel-purple to-pastel-pink bg-clip-text text-transparent">Loading...</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+    }>
+      <SignInForm />
+    </Suspense>
   )
 }
